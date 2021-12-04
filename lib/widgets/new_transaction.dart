@@ -21,10 +21,10 @@ class _NewTransactionState extends State<NewTransaction> {
     }
     final String enteredTitle = _titleController.text;
     final double enteredAmount = double.parse(_amountController.text);
-    if(enteredTitle.isEmpty || enteredAmount <= 0) {
+    if(enteredTitle.isEmpty || enteredAmount <= 0 || _selectedDate == null) {
       return;
     }
-    widget.addNewTransaction(enteredTitle,enteredAmount);
+    widget.addNewTransaction(enteredTitle,enteredAmount,_selectedDate);
   }
 
   void _presentDatePicker() {
@@ -81,7 +81,7 @@ class _NewTransactionState extends State<NewTransaction> {
               ),
             ),
             RaisedButton(
-              onPressed: () => _submitText,
+              onPressed: () => _submitText(""),
               child: Text("Add Transaction"),
               color: Theme.of(context).primaryColor,
               textColor: Theme.of(context).textTheme.button!.color,

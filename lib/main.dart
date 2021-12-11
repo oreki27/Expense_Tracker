@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter/services.dart';
 import './widgets/new_transaction.dart';
 import './widgets/transaction_list.dart';
 import '/widgets/chart.dart';
 import './models/transaction.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // SystemChrome.setPreferredOrientations([
+  //   DeviceOrientation.portraitUp,
+  //   DeviceOrientation.portraitDown,
+  // ]);
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -20,7 +27,7 @@ class MyApp extends StatelessWidget {
         accentColor: Colors.amber,
         appBarTheme: AppBarTheme(
           textTheme: ThemeData.light().textTheme.copyWith(
-            title: TextStyle(
+            headline6: TextStyle(
               fontFamily: 'OpenSans',
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -28,7 +35,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         textTheme: ThemeData.light().textTheme.copyWith(
-          title: TextStyle(
+          headline6: TextStyle(
             fontFamily: 'OpenSans',
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -58,6 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // ),
   ];
 
+  bool _showChart = false;
 
   List<Transaction> get _recentTransactions {
     return _userTransactions.where((tx) {
@@ -98,6 +106,8 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  List<bool> lst = [false,false];
+
   @override
   Widget build(BuildContext context) {
     final appBar = AppBar(
@@ -111,15 +121,63 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     return Scaffold(
       appBar: appBar,
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Chart(_recentTransactions),
-            TransactionList(_userTransactions,_deleteTransaction),
-          ],
-        ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text("Show Chart"),
+              Switch(value: _showChart, onChanged: (val) {
+                setState(() {
+                  _showChart = val;
+                });
+              }),
+            ],
+          ),
+          ExpansionPanelList(
+            expansionCallback: (index,isExpanded) {
+              setState(() {
+                lst[index] = !isExpanded;
+              });
+            },
+            children: [
+              ExpansionPanel(
+                headerBuilder: (ctx,isOpen) {
+                  return Text(
+                    'Chart',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 17,
+                    ),
+                  );
+                },
+                body: Container(
+                  child: Chart(_recentTransactions),
+                  height: (MediaQuery.of(context).size.height - appBar.preferredSize.height) * 0.25,
+                ),
+                isExpanded: lst[0],
+              ),
+              ExpansionPanel(
+                headerBuilder: (ctx,isOpen) {
+                  return Text(
+                    'Transaction List',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 17,
+                    ),
+                  );
+                },
+                body: Container(
+                  child: TransactionList(_userTransactions,_deleteTransaction),
+                  height: (MediaQuery.of(context).size.height - appBar.preferredSize.height) * 0.70,
+                ),
+                isExpanded: lst[1],
+              ),
+            ],
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
